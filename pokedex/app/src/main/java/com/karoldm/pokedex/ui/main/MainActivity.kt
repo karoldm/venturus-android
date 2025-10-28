@@ -1,4 +1,4 @@
-package com.karoldm.pokedex
+package com.karoldm.pokedex.ui.main
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -6,12 +6,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.karoldm.pokedex.R
 import com.karoldm.pokedex.adapters.ItemPokemonAdapter
-import com.karoldm.pokedex.data.mocks.MockPokemons
+import com.karoldm.pokedex.data.models.PokemonListItem
 import com.karoldm.pokedex.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    val pokemons = MockPokemons().pokemonsList
+    val pokemons: MutableList<PokemonListItem> = mutableListOf()
 
     private lateinit var adapter: ItemPokemonAdapter
     private lateinit var binding: ActivityMainBinding

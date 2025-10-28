@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -40,13 +41,26 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.okhttp.logging)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.glide)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+
+    kapt(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore:1.1.7")
+
+    implementation(libs.androidx.work.runtime.ktx)
 }
