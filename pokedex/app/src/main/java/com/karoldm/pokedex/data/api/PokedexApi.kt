@@ -1,7 +1,9 @@
 package com.karoldm.pokedex.data.api
 
+import com.karoldm.pokedex.data.models.GenerationResponse
 import com.karoldm.pokedex.data.models.PokemonDetailsResponse
 import com.karoldm.pokedex.data.models.PokemonListResponse
+import com.karoldm.pokedex.data.models.TypeListResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.logging.HttpLoggingInterceptor
@@ -10,18 +12,29 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 interface PokedexApiService {
-    @GET("/pokemon/:id")
-    suspend fun getPokemonDetails(id: String): Response<PokemonDetailsResponse>
+    @GET("pokemon/{id}")
+    suspend fun getPokemonDetails(@Path("id") id: String): Response<PokemonDetailsResponse>
 
-    @GET("/pokemon")
-    suspend fun getPokemonList(): Response<PokemonListResponse>
+    @GET("pokemon")
+    suspend fun getPokemonList(
+        @Query("offset") offset: Int,
+        @Query("limit") limit: Int
+    ): Response<PokemonListResponse>
+
+    @GET("type")
+    suspend fun getTypeList(): Response<TypeListResponse>
+
+    @GET("generation")
+    suspend fun getGenerationCount(): Response<GenerationResponse>
 }
 
 object RemoteApiProvider {
-    private const val BASE_URL = "https://pokeapi.co/api/v2"
+    private const val BASE_URL = "https://pokeapi.co/api/v2/"
 
     private val moshi: Moshi by lazy {
         Moshi.Builder()
