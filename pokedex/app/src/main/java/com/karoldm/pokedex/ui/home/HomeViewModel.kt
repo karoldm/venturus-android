@@ -44,6 +44,10 @@ class HomeViewModel(
         loadPokemons()
     }
 
+    fun clear() {
+        _pokemons.value = _originalPokemons
+    }
+
     fun filter(filter: Filter) {
         var filtered: List<Pokemon> = _originalPokemons
         filter.name?.let { name ->

@@ -7,8 +7,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.karoldm.pokedex.ui.theme.black
 import com.karoldm.pokedex.ui.theme.red
-import com.karoldm.pokedex.ui.theme.white
 
 @Composable
 fun FilterMenu(
@@ -33,7 +33,7 @@ fun FilterMenu(
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item, color = white) },
+                    text = { Text(item, color = black) },
                     onClick = { onSelect(item) }
                 )
             }

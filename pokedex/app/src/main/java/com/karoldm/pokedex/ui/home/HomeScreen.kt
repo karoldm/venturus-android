@@ -21,10 +21,14 @@ import com.karoldm.pokedex.navigation.Screen
 import com.karoldm.pokedex.ui.components.FilterMenu
 import com.karoldm.pokedex.ui.components.PokemonCard
 import com.karoldm.pokedex.ui.theme.red
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.outlined.BatteryStd
 import com.karoldm.pokedex.ui.theme.black
+import com.karoldm.pokedex.ui.theme.gray
 import com.karoldm.pokedex.ui.theme.off_white
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.Text
+
+
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -63,14 +67,11 @@ fun HomeScreen(navController: NavController) {
                         value = search,
                         onValueChange = { search = it },
                         label = { Text("Search by name") },
-                        singleLine = true
+                        singleLine = true,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier
-                            .height(48.dp)
-                            .width(48.dp),
+                    Button(modifier = Modifier
+                            .height(48.dp),
                         onClick = { viewModel.filter(Filter(name = search.ifBlank { null })) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = red
@@ -78,9 +79,9 @@ fun HomeScreen(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Search,
-                            contentDescription = "App Logo",
+                            contentDescription = "search",
                             tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -110,6 +111,14 @@ fun HomeScreen(navController: NavController) {
                             typeMenuExpanded = false
                         }
                     )
+                    Button(
+                        modifier = Modifier
+                            .height(40.dp),
+                        onClick = { viewModel.clear() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = gray
+                        )
+                    ) { Text("Clear", color = black)}
                 }
 
                 Spacer(Modifier.height(16.dp))
