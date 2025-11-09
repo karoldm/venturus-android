@@ -39,7 +39,7 @@ Exibe informações completas sobre os Pokémons, incluindo imagem, tipo, estat�
 
 ## ⚙️ Estrutura do Projeto
 
-``
+```
 com.karoldm.pokedex/
 │
 ├── data/
