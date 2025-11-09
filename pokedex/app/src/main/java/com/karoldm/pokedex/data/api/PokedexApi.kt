@@ -1,9 +1,10 @@
 package com.karoldm.pokedex.data.api
 
-import com.karoldm.pokedex.data.models.GenerationResponse
-import com.karoldm.pokedex.data.models.PokemonDetailsResponse
-import com.karoldm.pokedex.data.models.PokemonListResponse
-import com.karoldm.pokedex.data.models.TypeListResponse
+import com.karoldm.pokedex.data.models.api.GenerationsResponse
+import com.karoldm.pokedex.data.models.api.PokemonDetails
+import com.karoldm.pokedex.data.models.api.PokemonSpecies
+import com.karoldm.pokedex.data.models.api.PokemonsResponse
+import com.karoldm.pokedex.data.models.api.PokemonTypesResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.logging.HttpLoggingInterceptor
@@ -17,20 +18,24 @@ import retrofit2.http.Query
 
 
 interface PokedexApiService {
-    @GET("pokemon/{id}")
-    suspend fun getPokemonDetails(@Path("id") id: String): Response<PokemonDetailsResponse>
+    @GET("pokemon/{name}")
+    suspend fun getPokemonDetails(@Path("name") name: String): Response<PokemonDetails>
 
     @GET("pokemon")
     suspend fun getPokemonList(
         @Query("offset") offset: Int,
         @Query("limit") limit: Int
-    ): Response<PokemonListResponse>
+    ): Response<PokemonsResponse>
 
     @GET("type")
-    suspend fun getTypeList(): Response<TypeListResponse>
+    suspend fun getTypeList(): Response<PokemonTypesResponse>
 
     @GET("generation")
-    suspend fun getGenerationCount(): Response<GenerationResponse>
+    suspend fun getGenerations(): Response<GenerationsResponse>
+
+    @GET("pokemon-species/{name}")
+    suspend fun getPokemonSpecies(@Path("name") name: String): Response<PokemonSpecies>
+
 }
 
 object RemoteApiProvider {

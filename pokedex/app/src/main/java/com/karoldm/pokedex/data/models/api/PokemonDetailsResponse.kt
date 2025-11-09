@@ -1,24 +1,20 @@
-package com.karoldm.pokedex.data.models
+package com.karoldm.pokedex.data.models.api
 
 import com.squareup.moshi.Json
 
-data class PokemonDetailsResponse(
+data class PokemonDetails(
     @Json(name = "weight") val weight: Int,
     @Json(name = "height") val height: Int,
     @Json(name = "types") val types: List<PokemonTypeSlot>,
     @Json(name = "stats") val stats: List<PokemonStat>,
     @Json(name = "sprites") val sprites: Sprites,
     @Json(name = "name") val name: String,
+    @Json(name="species") val species: PokemonDetailsSpecie
 )
 
 data class PokemonTypeSlot(
     @Json(name = "slot") val slot: Int,
-    @Json(name = "type") val type: PokemonDetailsType
-)
-
-data class PokemonDetailsType(
-    @Json(name = "name") val name: String,
-    @Json(name = "url") val url: String
+    @Json(name = "type") val type: PokemonType
 )
 
 data class PokemonStat(

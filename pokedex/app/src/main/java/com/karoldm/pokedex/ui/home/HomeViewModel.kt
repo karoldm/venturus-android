@@ -1,75 +1,101 @@
 package com.karoldm.pokedex.ui.home
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karoldm.pokedex.data.models.PokemonListItem
-import com.karoldm.pokedex.data.models.PokemonType
+import com.karoldm.pokedex.data.models.api.Generation
+import com.karoldm.pokedex.data.models.api.PokemonDetails
+import com.karoldm.pokedex.data.models.api.PokemonType
+import com.karoldm.pokedex.data.models.view.Pokemon
 import com.karoldm.pokedex.data.repositories.PokedexRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.collections.addAll
 
+data class Filter(
+    val name: String? = null,
+    val type: String? = null,
+    val gen: String? = null,
+)
 
 class HomeViewModel(
     private val pokedexRepository: PokedexRepository
-): ViewModel() {
-    private var _loading = MutableLiveData<Boolean>(false)
-    val loading: LiveData<Boolean> get() = _loading
+) : ViewModel() {
 
-    private var _typeList= MutableLiveData<List<PokemonType>>()
-    val typeList: LiveData<List<PokemonType>> get() = _typeList
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
-    private var _pokemons = MutableLiveData(arrayListOf<PokemonListItem>())
-    val pokemons: LiveData<ArrayList<PokemonListItem>> get() = _pokemons
+    private val _typeList = MutableStateFlow<List<PokemonType>>(emptyList())
+    val typeList: StateFlow<List<PokemonType>> = _typeList.asStateFlow()
 
-    private val limit = 50;
-    private var offset = 0;
+    private val _genList = MutableStateFlow<List<Generation>>(emptyList())
+    val genList: StateFlow<List<Generation>> = _genList.asStateFlow()
 
-    private var _genCount = MutableLiveData<Int>(0)
-    val genCount: LiveData<Int> get() = _genCount
+    private val _originalPokemons = mutableListOf<Pokemon>()
+    private val _pokemons = MutableStateFlow<List<Pokemon>>(emptyList())
+    val pokemons: StateFlow<List<Pokemon>> = _pokemons.asStateFlow()
 
     init {
         loadFilters()
         loadPokemons()
     }
 
-    fun loadFilters() {
-        viewModelScope.launch {
-            pokedexRepository.fetchTypeList()
-                .onSuccess {
-                    _typeList.value = it
-                }
-                .onFailure {
-                    print("Error to fetch types")
-                }
-            pokedexRepository.fetchGenerationCount()
-                .onSuccess { generationCount ->
-                    _genCount.value = generationCount
+    fun filter(filter: Filter) {
+        var filtered: List<Pokemon> = _originalPokemons
+        filter.name?.let { name ->
+            filtered = filtered.filter { it.name.contains(name, ignoreCase = true) }
+        }
+        filter.type?.let { type ->
+            filtered = filtered.filter { pokemon ->
+                pokemon.types.any { it.name == type }
+            }
+        }
+        filter.gen?.let { gen ->
+            filtered = filtered.filter { it.generation.name == gen }
+        }
+        _pokemons.value = filtered.toMutableList()
+    }
 
-                }
-                .onFailure {
-                    print("Error to fetch generation count")
-                }
+    private fun loadFilters() {
+        viewModelScope.launch {
+            pokedexRepository.fetchTypes()
+                .onSuccess { _typeList.value = it }
+                .onFailure { Log.e("homeViewModel", "Error fetching types") }
+
+            pokedexRepository.fetchGenerations()
+                .onSuccess { _genList.value = it }
+                .onFailure { Log.e("homeViewModel", "Error fetching generations") }
         }
     }
 
-
     fun loadPokemons() {
         viewModelScope.launch {
-            pokedexRepository.fetchPokemons(offset, limit)
-                .onSuccess {
-                    val currentList = _pokemons.value ?: arrayListOf()
-                    val newList = ArrayList(currentList).apply {
-                        addAll(it.results)
+            _loading.value = true
+            pokedexRepository.fetchPokemons(0, 2000)
+                .onSuccess { response ->
+                    val details = coroutineScope {
+                        response.results.map { pokemon ->
+                            async {
+                                val result = pokedexRepository.fetchPokemon(pokemon.name)
+                                result.onFailure { e ->
+                                    Log.e("HomeViewModel", "Failed for ${pokemon.name}: $e")
+                                }
+                                result.getOrNull()
+                            }
+                        }.awaitAll().filterNotNull()
                     }
-                    _pokemons.value = newList
-                    offset += limit
+                    _originalPokemons.clear()
+                    _originalPokemons.addAll(details)
+                    _pokemons.value = details
                 }
-                .onFailure {
-                    print("Error to fetch pokemons")
+                .onFailure { e ->
+                    println("Error fetching pokemons: $e")
                 }
+            _loading.value = false
         }
     }
 }

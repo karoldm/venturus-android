@@ -1,38 +1,36 @@
 package com.karoldm.pokedex.ui.home
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.karoldm.pokedex.data.models.PokemonDetailsResponse
+import com.karoldm.pokedex.data.models.view.Pokemon
 import com.karoldm.pokedex.data.repositories.PokedexRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
 class DetailsViewModel(
-    private val pokedexRepository: PokedexRepository,
-): ViewModel() {
-    private var _loading = MutableLiveData<Boolean>(false)
-    val loading: LiveData<Boolean> get() = _loading
+    private val pokedexRepository: PokedexRepository
+) : ViewModel() {
 
-    private var _pokemon = MutableLiveData<PokemonDetailsResponse>()
-    val pokemon: LiveData<PokemonDetailsResponse> get() = _pokemon
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
+    private val _pokemon = MutableStateFlow<Pokemon?>(null)
+    val pokemon: StateFlow<Pokemon?> = _pokemon.asStateFlow()
 
-    fun getPokemon(id: String) {
-        Log.e("pokemon", id)
+    fun loadPokemon(name: String) {
         viewModelScope.launch {
-            pokedexRepository.fetchPokemonDetails(id)
-                .onSuccess {
-                    Log.e("sucess", it.toString())
-                    _pokemon.value = it
+            _loading.value = true
+            pokedexRepository.fetchPokemon(name)
+                .onSuccess { response ->
+                    _pokemon.value = response
                 }
-                .onFailure {
-                    Log.e("pokemon", it.toString())
-                    print("Error to fetch pokemon with ID: $id")
+                .onFailure { e ->
+                    println("Error fetching pokemon: $e")
                 }
+            _loading.value = false
         }
     }
 }
